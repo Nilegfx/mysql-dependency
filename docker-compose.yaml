@@ -1,0 +1,27 @@
+version: '2.2'
+services:
+  users-db:
+    container_name: 'users-db-container'
+    image: mysql
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      MYSQL_ROOT_PASSWORD: example
+      MYSQL_USER: root
+      MYSQL_DATABASE: mysql
+    ports:
+      - 3306:3306
+    healthcheck:
+      test: "mysql --password=example --user=root -e 'SELECT VERSION();SELECT NOW()'"
+      interval: 5s
+      retries: 10
+      timeout: 5s
+
+  users-service:
+    container_name: 'users-service-container'
+    depends_on:
+      users-db:
+        condition: service_healthy
+    build: 
+      context: .
+    ports:
+      - 8080:8080
